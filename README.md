@@ -1,63 +1,288 @@
 # labIOT
-Thiết lập Kafka
-Mac
-các cửa sổ
-Đảm bảo rằng bạn đang ở trong thư mục bin / windows .
-Bắt đầu Zookeeper và Kafka Broker
-Khởi động Zookeeper.
+# Setting Up Kafka
+
+<details><summary>Mac</summary>
+<p>
+
+- Make sure you are navigated inside the bin directory.
+
+## Start Zookeeper and Kafka Broker
+
+-   Start up the Zookeeper.
+
+```
+./zookeeper-server-start.sh ../config/zookeeper.properties
+```
+
+- Add the below properties in the server.properties
+
+```
+listeners=PLAINTEXT://localhost:9092
+auto.create.topics.enable=false
+```
+
+-   Start up the Kafka Broker
+
+```
+./kafka-server-start.sh ../config/server.properties
+```
+
+## How to create a topic ?
+
+```
+./kafka-topics.sh --create --topic test-topic -zookeeper localhost:2181 --replication-factor 1 --partitions 4
+```
+
+## How to instantiate a Console Producer?
+
+### Without Key
+
+```
+./kafka-console-producer.sh --broker-list localhost:9092 --topic test-topic
+```
+
+### With Key
+
+```
+./kafka-console-producer.sh --broker-list localhost:9092 --topic test-topic --property "key.separator=-" --property "parse.key=true"
+```
+
+## How to instantiate a Console Consumer?
+
+### Without Key
+
+```
+./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test-topic --from-beginning
+```
+
+### With Key
+
+```
+./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test-topic --from-beginning -property "key.separator= - " --property "print.key=true"
+```
+
+### With Consumer Group
+
+```
+./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test-topic --group <group-name>
+```
+</p>
+
+</details>
+
+<details><summary>Windows</summary>
+<p>
+
+- Make sure you are inside the **bin/windows** directory.
+
+## Start Zookeeper and Kafka Broker
+
+-   Start up the Zookeeper.
+
+```
 zookeeper-server-start.bat ..\..\config\zookeeper.properties
-Khởi động Kafka Broker.
+```
+
+-   Start up the Kafka Broker.
+
+```
 kafka-server-start.bat ..\..\config\server.properties
-Làm thế nào để tạo một chủ đề?
+```
+
+## How to create a topic ?
+
+```
 kafka-topics.bat --create --topic test-topic -zookeeper localhost:2181 --replication-factor 1 --partitions 4
-Làm cách nào để khởi tạo Console Producer?
-Không có chìa khóa
+```
+
+## How to instantiate a Console Producer?
+
+### Without Key
+
+```
 kafka-console-producer.bat --broker-list localhost:9092 --topic test-topic
-Cùng với chìa khóa
+```
+
+### With Key
+
+```
 kafka-console-producer.bat --broker-list localhost:9092 --topic test-topic --property "key.separator=-" --property "parse.key=true"
-Làm thế nào để khởi tạo Người tiêu dùng bảng điều khiển?
-Không có chìa khóa
+```
+
+## How to instantiate a Console Consumer?
+
+### Without Key
+
+```
 kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic test-topic --from-beginning
-Cùng với chìa khóa
+```
+
+### With Key
+
+```
 kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic test-topic --from-beginning -property "key.separator= - " --property "print.key=true"
-Với nhóm người tiêu dùng
+```
+
+### With Consumer Group
+
+```
 kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic test-topic --group <group-name>
-Thiết lập nhiều nhà môi giới Kafka
-Bước đầu tiên là thêm một server.properties mới .
+```
+</p>
 
-Chúng tôi cần sửa đổi ba thuộc tính để bắt đầu thiết lập nhiều nhà môi giới.
+</details>
 
+## Setting Up Multiple Kafka Brokers
+
+- The first step is to add a new **server.properties**.
+
+- We need to modify three properties to start up a multi broker set up.
+
+```
 broker.id=<unique-broker-d>
 listeners=PLAINTEXT://localhost:<unique-port>
 log.dirs=/tmp/<unique-kafka-folder>
 auto.create.topics.enable=false
-Cấu hình ví dụ sẽ như dưới đây.
+```
+
+- Example config will be like below.
+
+```
 broker.id=1
 listeners=PLAINTEXT://localhost:9093
 log.dirs=/tmp/kafka-logs-1
 auto.create.topics.enable=false
-Khởi động Nhà môi giới mới
-Cung cấp server.properties mới đã được thêm vào.
+```
+
+### Starting up the new Broker
+
+- Provide the new **server.properties** thats added.
+
+```
 ./kafka-server-start.sh ../config/server-1.properties
+```
+
+```
 ./kafka-server-start.sh ../config/server-2.properties
-Hoạt động Kafka CLI nâng cao:
-Mac
-các cửa sổ
-Đảm bảo rằng bạn đang ở trong thư mục bin / windows .
-Liệt kê các chủ đề trong một cụm
+```
+
+# Advanced Kafka CLI operations:
+
+<details><summary>Mac</summary>
+<p>
+
+## List the topics in a cluster
+
+```
+./kafka-topics.sh --zookeeper localhost:2181 --list
+```
+
+## Describe topic
+
+- The below command can be used to describe all the topics.
+
+```
+./kafka-topics.sh --zookeeper localhost:2181 --describe
+```
+
+- The below command can be used to describe a specific topic.
+
+```
+./kafka-topics.sh --zookeeper localhost:2181 --describe --topic <topic-name>
+```
+
+## Alter the min insync replica
+```
+./kafka-topics.sh --alter --zookeeper localhost:2181 --topic library-events --config min.insync.replicas=2
+```
+
+## Delete a topic
+
+```
+./kafka-topics.sh --zookeeper localhost:2181 --delete --topic test-topic
+```
+## How to view consumer groups
+
+```
+./kafka-consumer-groups.sh --bootstrap-server localhost:9092 --list
+```
+
+### Consumer Groups and their Offset
+
+```
+./kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group console-consumer-27773
+```
+
+## Viewing the Commit Log
+
+```
+./kafka-run-class.sh kafka.tools.DumpLogSegments --deep-iteration --files /tmp/kafka-logs/test-topic-0/00000000000000000000.log
+```
+
+## Setting the Minimum Insync Replica
+
+```
+./kafka-configs.sh --alter --zookeeper localhost:2181 --entity-type topics --entity-name test-topic --add-config min.insync.replicas=2
+```
+</p>
+</details>
+
+
+<details><summary>Windows</summary>
+<p>
+
+- Make sure you are inside the **bin/windows** directory.
+
+## List the topics in a cluster
+
+```
 kafka-topics.bat --zookeeper localhost:2181 --list
-Mô tả chủ đề
-Lệnh dưới đây có thể được sử dụng để mô tả tất cả các chủ đề.
+```
+
+## Describe topic
+
+- The below command can be used to describe all the topics.
+
+```
 kafka-topics.bat --zookeeper localhost:2181 --describe
-Lệnh dưới đây có thể được sử dụng để mô tả một chủ đề cụ thể.
+```
+
+- The below command can be used to describe a specific topic.
+
+```
 kafka-topics.bat --zookeeper localhost:2181 --describe --topic <topic-name>
-Thay đổi bản sao thiếu đồng bộ
+```
+
+## Alter the min insync replica
+```
 kafka-topics.bat --alter --zookeeper localhost:2181 --topic library-events --config min.insync.replicas=2
-Xóa chủ đề
+```
+
+
+## Delete a topic
+
+```
 kafka-topics.bat --zookeeper localhost:2181 --delete --topic <topic-name>
-Cách xem các nhóm người tiêu dùng
+```
+
+
+## How to view consumer groups
+
+```
 kafka-consumer-groups.bat --bootstrap-server localhost:9092 --list
-Nhóm người tiêu dùng và sự bù đắp của họ
+```
+
+### Consumer Groups and their Offset
+
+```
 kafka-consumer-groups.bat --bootstrap-server localhost:9092 --describe --group console-consumer-27773
-Xem Nhật ký cam kết
+```
+
+## Viewing the Commit Log
+
+```
 kafka-run-class.bat kafka.tools.DumpLogSegments --deep-iteration --files /tmp/kafka-logs/test-topic-0/00000000000000000000.log
+```
+</p>
+</details>
+
